@@ -6,6 +6,7 @@ import codecs
 import os
 import socket
 import subprocess
+import re
 
 # Force encoding to UTF-8
 import locale                                  # Ensures that subsequent open()s
@@ -39,6 +40,18 @@ def setValue(node,path,value):
   else:
     node[path[0]] = {}
     setValue(node[key],path[1:],value)
+
+def gateway(batadv_dev):
+  output = subprocess.check_output(["batctl","-m",batadv_dev,"gwl","-n"])
+  output_utf8 = output.decode("utf-8")
+  lines = output_utf8.splitlines()
+
+  for line in lines:
+    gw_line = re.match(r"^=> +([0-9a-f:]+) ", line)
+    if gw_line:
+      gw = gw_line.group(1)
+
+  return gw
 
 parser = argparse.ArgumentParser()
 
