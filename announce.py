@@ -48,12 +48,16 @@ parser.add_argument('-d', '--directory', action='store',
 parser.add_argument('-b', '--batman', action='store',
                   help='batman-adv device',default='bat0')
 
+parser.add_argument('-i', '--interface', action='store',
+                  help='freifunk bridge',default='br0')
+
 args = parser.parse_args()
 
 options = vars(args)
 
 directory = options['directory']
 batadv_dev = options['batman']
+bridge_dev = options['interface']
 
 data = {}
 
