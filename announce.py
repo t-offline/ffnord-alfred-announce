@@ -7,6 +7,7 @@ import os
 import socket
 import subprocess
 import re
+import netifaces as netif
 
 # Force encoding to UTF-8
 import locale                                  # Ensures that subsequent open()s
@@ -66,6 +67,16 @@ def clients(batadv_dev):
       count += 1
 
   return count
+
+def addresses(bridge_dev):
+  ip6_addrs = netif.ifaddresses(bridge_dev)
+  ip6_list = []
+
+  for ip6 in netif.ifaddresses(bridge_dev)[netif.AF_INET6]:
+    raw = ip6['addr'].split('%')
+    ip6_list.append(raw[0])
+
+  return ip6_list
 
 parser = argparse.ArgumentParser()
 
