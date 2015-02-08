@@ -53,6 +53,20 @@ def gateway(batadv_dev):
 
   return gw
 
+def clients(batadv_dev):
+  output = subprocess.check_output(["batctl","-m",batadv_dev,"tl","-n"])
+  output_utf8 = output.decode("utf-8")
+  lines = output_utf8.splitlines()
+
+  count = 0
+
+  for line in lines:
+    client_line = re.match(r"^\s\*\s[0-9a-f:]+\s+-\d\s\[[W\.]+\]", line)
+    if client_line:
+      count += 1
+
+  return count
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-d', '--directory', action='store',
