@@ -6,6 +6,8 @@ import codecs
 import os
 import socket
 import subprocess
+import re
+import netifaces as netif
 
 # Force encoding to UTF-8
 import locale                                  # Ensures that subsequent open()s
@@ -40,6 +42,43 @@ def setValue(node,path,value):
     node[path[0]] = {}
     setValue(node[key],path[1:],value)
 
+def gateway(batadv_dev):
+  output = subprocess.check_output(["batctl","-m",batadv_dev,"gwl","-n"])
+  output_utf8 = output.decode("utf-8")
+  lines = output_utf8.splitlines()
+  gw = []
+
+  for line in lines:
+    gw_line = re.match(r"^=> +([0-9a-f:]+) ", line)
+    if gw_line:
+      gw = gw_line.group(1)
+
+  return gw
+
+def clients(batadv_dev):
+  output = subprocess.check_output(["batctl","-m",batadv_dev,"tl","-n"])
+  output_utf8 = output.decode("utf-8")
+  lines = output_utf8.splitlines()
+
+  count = 0
+
+  for line in lines:
+    client_line = re.match(r"^\s\*\s[0-9a-f:]+\s+-\d\s\[[W\.]+\]", line)
+    if client_line:
+      count += 1
+
+  return count
+
+def addresses(bridge_dev):
+  ip6_addrs = netif.ifaddresses(bridge_dev)
+  ip6_list = []
+
+  for ip6 in netif.ifaddresses(bridge_dev)[netif.AF_INET6]:
+    raw = ip6['addr'].split('%')
+    ip6_list.append(raw[0])
+
+  return ip6_list
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-d', '--directory', action='store',
@@ -48,12 +87,16 @@ parser.add_argument('-d', '--directory', action='store',
 parser.add_argument('-b', '--batman', action='store',
                   help='batman-adv device',default='bat0')
 
+parser.add_argument('-i', '--interface', action='store',
+                  help='freifunk bridge',default='br0')
+
 args = parser.parse_args()
 
 options = vars(args)
 
 directory = options['directory']
 batadv_dev = options['batman']
+bridge_dev = options['interface']
 
 data = {}
 

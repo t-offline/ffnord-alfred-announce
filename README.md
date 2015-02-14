@@ -8,6 +8,8 @@ A gluon compatible status script for alfred in python.
  * lsb_release
  * ethtool
  * alfred binary in PATH
+ * python3
+ * python3-netifaces
 
 ## Setup
 

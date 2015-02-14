@@ -8,13 +8,19 @@ while test $# -gt 0; do
       shift
       ip link show dev $1 > /dev/null
       test $? -ne 0 && exit
-      INTERFACE="-I $1"
+      INTERFACE="-i $1"
       ;;
     -b)
       shift
       ip link show dev $1 > /dev/null
       test $? -ne 0 && exit
       BATADV="-b $1"
+      ;;
+    -u)
+      shift
+      alfred-json -z -r 158 -s $1 > /dev/null
+      test $? -ne 0 && exit
+      ALFREDSOCKET="-u $1"
       ;;
     -h|--help)
       echo "Usage: $0 [-i <ifname>] [-b <batadv-dev>]"
@@ -24,5 +30,5 @@ while test $# -gt 0; do
   shift
 done
 
-"${DIR}"/announce.py -d "${DIR}"/nodeinfo.d/ ${BATADV} | gzip | alfred $INTERFACE -s 158
-"${DIR}"/announce.py -d "${DIR}"/statistics.d/ ${BATADV} | gzip | alfred $INTERFACE -s 159
+"${DIR}"/announce.py -d "${DIR}"/nodeinfo.d/ ${INTERFACE} ${BATADV} | gzip | alfred $ALFREDSOCKET $INTERFACE -s 158
+"${DIR}"/announce.py -d "${DIR}"/statistics.d/ ${INTERFACE} ${BATADV} | gzip | alfred $ALFREDSOCKET $INTERFACE -s 159
